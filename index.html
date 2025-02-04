@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            width: 100%;
+            background: #fff;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .header {
+            color: #787B86;
+            font-size: 18px;
+            padding: 15px;
+        }
+
+        .pair-container {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e3eb;
+            width: 100%;
+        }
+
+        .pair-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .pair-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .flag-container {
+            position: relative;
+            min-width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .flag-image {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+        }
+
+        .flag-primary {
+            top: 0;
+            left: 0;
+        }
+
+        .flag-secondary {
+            bottom: 0;
+            right: 0;
+        }
+
+        .pair-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .symbol {
+            font-size: 16px;
+            font-weight: 500;
+            color: #131722;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .description {
+            font-size: 12px;
+            color: #787B86;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .view-button {
+            background: #2962FF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 12px;
+            flex-shrink: 0;
+            min-width: 60px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .view-button:hover {
+            background: #1E4ECC;
+        }
+
+        .dialog-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .dialog {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #131722;
+        }
+
+        .dialog-content {
+            margin-bottom: 20px;
+        }
+
+        .dialog input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e0e3eb;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .dialog-button {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .dialog-button.primary {
+            background: #2962FF;
+            color: white;
+            border: none;
+        }
+
+        .dialog-button.primary:hover {
+            background: #1E4ECC;
+        }
+
+        .help-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .help-text a {
+            color: #2962FF;
+            text-decoration: none;
+        }
+
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .pair-info {
+                gap: 8px;
+            }
+
+            .symbol {
+                font-size: 14px;
+            }
+
+            .description {
+                font-size: 11px;
+            }
+
+            .view-button {
+                padding: 4px 8px;
+                font-size: 12px;
+                min-width: 50px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .description {
+                max-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Session ID Dialog -->
+    <div class="dialog-overlay" id="sessionDialog">
+        <div class="dialog">
+            <div class="dialog-title">Enter Session ID</div>
+            <div class="dialog-content">
+                <input type="text" id="sessionInput" placeholder="Enter your session ID">
+            </div>
+            <div class="dialog-buttons">
+                <button class="dialog-button primary" id="continueButton">Continue</button>
+            </div>
+            <div class="help-text">
+                <a href="https://github.com/trustosas/market-review" target="_blank">How do I get a Session ID?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content" id="mainContent">
+        <div class="header">Majors</div>
+        <div class="pairs-list">
+            <div class="pair-container">
+                <div class="pair-row">
+                    <div class="pair-info">
+                        <div class="flag-container">
+                            <img class="flag-image flag-primary" src="https://s3-symbol-logo.tradingview.com/country/EU.svg" alt="EUR">
+                            <img class="flag-image flag-secondary" src="https://s3-symbol-logo.tradingview.com/country/US.svg" alt="USD">
+                        </div>
+                        <div class="pair-text">
+                            <span class="symbol">EURUSD</span>
+                            <span class="description">Euro / U.S. Dollar</span>
+                        </div>
+                    </div>
+                    <a href="#" class="view-button" data-market-id="154290">View</a>
+                </div>
+            </div>
+
+            <div class="pair-container">
+                <div class="pair-row">
+                    <div class="pair-info">
+                        <div class="flag-container">
+                            <img class="flag-image flag-primary" src="https://s3-symbol-logo.tradingview.com/country/US.svg" alt="USD">
+                            <img class="flag-image flag-secondary" src="https://s3-symbol-logo.tradingview.com/country/JP.svg" alt="JPY">
+                        </div>
+                        <div class="pair-text">
+                            <span class="symbol">USDJPY</span>
+                            <span class="description">U.S. Dollar / Japanese Yen</span>
+                        </div>
+                    </div>
+                    <a href="#" class="view-button" data-market-id="154303">View</a>
+                </div>
+            </div>
+
+            <div class="pair-container">
+                <div class="pair-row">
+                    <div class="pair-info">
+                        <div class="flag-container">
+                            <img class="flag-image flag-primary" src="https://s3-symbol-logo.tradingview.com/country/GB.svg" alt="GBP">
+                            <img class="flag-image flag-secondary" src="https://s3-symbol-logo.tradingview.com/country/US.svg" alt="USD">
+                        </div>
+                        <div class="pair-text">
+                            <span class="symbol">GBPUSD</span>
+                            <span class="description">British Pound / U.S. Dollar</span>
+                        </div>
+                    </div>
+                    <a href="https://standalonecharts.svc.cityindex.com/?hideLeftSideToolbar=false&hideTopToolbar=false&locale=en&marketId=401449252&username=DM343500&session=" target="_blank" class="view-button">View</a>
+                </div>
+            </div>
+            
+            <div class="pair-container">
+                <div class="pair-row">
+                    <div class="pair-info">
+                        <div class="flag-container">
+                            <img class="flag-image flag-primary" src="https://s3-symbol-logo.tradingview.com/country/AU.svg" alt="AUD">
+                            <img class="flag-image flag-secondary" src="https://s3-symbol-logo.tradingview.com/country/US.svg" alt="USD">
+                        </div>
+                        <div class="pair-text">
+                            <span class="symbol">AUDUSD</span>
+                            <span class="description">Australian Dollar / U.S. Dollar</span>
+                        </div>
+                    </div>
+                    <a href="https://standalonecharts.svc.cityindex.com/?hideLeftSideToolbar=false&hideTopToolbar=false&locale=en&marketId=401203188&username=DM343500&session=" target="_blank" class="view-button">View</a>
+                </div>
+            </div>
+            
+            <div class="pair-container">
+                <div class="pair-row">
+                    <div class="pair-info">
+                        <div class="flag-container">
+                            <img class="flag-image flag-primary" src="https://s3-symbol-logo.tradingview.com/country/US.svg" alt="USD">
+                            <img class="flag-image flag-secondary" src="https://s3-symbol-logo.tradingview.com/country/CA.svg" alt="CAD">
+                        </div>
+                        <div class="pair-text">
+                            <span class="symbol">USDCAD</span>
+                            <span class="description">U.S. Dollar / Canadian Dollar</span>
+                        </div>
+                    </div>
+                    <a href="https://standalonecharts.svc.cityindex.com/?hideLeftSideToolbar=false&hideTopToolbar=false&locale=en&marketId=401203195&username=DM343500&session=" target="_blank" class="view-button">View</a>
+                </div>
+            </div>
+            
+            <div class="pair-container">
+                <div class="pair-row">
+                    <div class="pair-info">
+                        <div class="flag-container">
+                            <img class="flag-image flag-primary" src="https://s3-symbol-logo.tradingview.com/country/US.svg" alt="USD">
+                            <img class="flag-image flag-secondary" src="https://s3-symbol-logo.tradingview.com/country/CH.svg" alt="CHF">
+                        </div>
+                        <div class="pair-text">
+                            <span class="symbol">USDCHF</span>
+                            <span class="description">U.S. Dollar / Swiss Franc</span>
+                        </div>
+                    </div>
+                    <a href="https://standalonecharts.svc.cityindex.com/?hideLeftSideToolbar=false&hideTopToolbar=false&locale=en&marketId=401203196&username=DM343500&session=" target="_blank" class="view-button">View</a>
+                </div>
+            </div>
+            
+            <div class="pair-container">
+                <div class="pair-row">
+                    <div class="pair-info">
+                        <div class="flag-container">
+                            <img class="flag-image flag-primary" src="https://s3-symbol-logo.tradingview.com/country/NZ.svg" alt="NZD">
+                            <img class="flag-image flag-secondary" src="https://s3-symbol-logo.tradingview.com/country/US.svg" alt="USD">
+                        </div>
+                        <div class="pair-text">
+                            <span class="symbol">NZDUSD</span>
+                            <span class="description">New Zealand Dollar / U.S. Dollar</span>
+                        </div>
+                    </div>
+                    <a href="https://standalonecharts.svc.cityindex.com/?hideLeftSideToolbar=false&hideTopToolbar=false&locale=en&marketId=401203194&username=DM343500&session=" target="_blank" class="view-button">View</a>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        let sessionId = '';
+        const dialog = document.getElementById('sessionDialog');
+        const mainContent = document.getElementById('mainContent');
+        const sessionInput = document.getElementById('sessionInput');
+        const continueButton = document.getElementById('continueButton');
+
+        // Focus on input when page loads
+        window.onload = () => sessionInput.focus();
+
+        // Handle continue button
+        continueButton.addEventListener('click', () => {
+            sessionId = sessionInput.value.trim();
+            if (sessionId) {
+                dialog.style.display = 'none';
+                mainContent.style.display = 'block';
+                setupChartLinks();
+            }
+        });
+
+        // Handle Enter key in input
+        sessionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                continueButton.click();
+            }
+        });
+
+        // Setup chart links with session ID
+        function setupChartLinks() {
+            document.querySelectorAll('.view-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const marketId = button.dataset.marketId;
+                    const url = `https://webtrading2.forex.com/TradingViewChartsG2/?hideLeftSideToolbar=false&hideTopToolbar=false&locale=en&username=DA870193&marketId=${marketId}&session=${sessionId}`;
+                    window.open(url, '_blank');
+                });
+            });
+        }
+    </script>
+</body>
+</html>
