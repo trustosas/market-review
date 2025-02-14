@@ -19,4 +19,6 @@ The chart widget is sourced directly from CityIndex, Forex.COM's sister company.
 
 3. Now, whenever you visit https://www.cityindex.com/en-au/forex-trading/eur-usd/ and wait a bit, the Session ID will be copied to your clipboard.
 
+Oh, and a session ID lasts for 8 days.
+
 That's all.
